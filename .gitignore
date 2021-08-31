@@ -1,8 +1,14 @@
+
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 
+# mis ignores
+results/
+SFTF_folder/
 # C extensions
 *.so
 
