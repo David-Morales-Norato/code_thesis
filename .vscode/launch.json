@@ -1,0 +1,24 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+    {
+        "name": "main",
+        "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main_classpr.py",
+            "console": "integratedTerminal",
+            "args": ["config_files/config_mnist.json"]
+        },
+        {
+            "name": "test initializations",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/test_initializations.py",
+            "console": "integratedTerminal",
+            "args": ["config_files/config_test_initializations.json"]
+        }
+    ]
+}

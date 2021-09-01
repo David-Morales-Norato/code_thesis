@@ -25,10 +25,8 @@ class customGaussian(tf.keras.layers.Layer):
         return x + tf.keras.backend.random_normal(shape=x.shape,mean=0,stddev=stddev, dtype=x.dtype)
 
     def call(self, input):
-        input = tf.cast(input, tf.float64)
-        
+        input = tf.cast(input, tf.float64)      
         salida = tf.map_fn(self.add_noise_each_x,input)
-        
         return salida
 
 class CLASSIFICATION_MODEL(tf.keras.Model):

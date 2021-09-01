@@ -32,7 +32,7 @@ class Encoder(tf.keras.layers.Layer):
 
 class Decoder(tf.keras.layers.Layer):
     
-    def __init__(self, n_filters=32, k_size=3, alpha = 0.2, name="Decoder", bloque = 1,**kwargs):
+    def __init__(self, n_filters=32, k_size=3, alpha = 0.5, name="Decoder", bloque = 1,**kwargs):
         super(Decoder, self).__init__(name=name, **kwargs)
 
         self.n_filters = n_filters
@@ -51,9 +51,13 @@ class Decoder(tf.keras.layers.Layer):
     def call(self, inputs):
 
         skip, entrada = inputs
+        
         c = self.conv_t(entrada)
         up_sampled = self.LRL1(c)
-        concat = self.concat([up_sampled, skip])
+        if skip is None:
+          concat = up_sampled
+        else: 
+          concat = self.concat([up_sampled, skip])
         c = self.bn(concat)
         c = self.conv_2(c)
         c = self.LRL2(c)
@@ -62,7 +66,7 @@ class Decoder(tf.keras.layers.Layer):
 
 class Unet(tf.keras.layers.Layer):
     
-    def __init__(self, k_size=3, alpha = 0.5, filtros_encoder = [64, 128,1024], filtros_decoder = [1024, 128, 64] , name="UNET", **kwargs):
+    def __init__(self, k_size=3, alpha = 0.5, filtros_encoder = [16, 32, 64], filtros_decoder = [64, 32, 16] , name="UNET", **kwargs):
         super(Unet, self).__init__(name=name, **kwargs)
         
         self.k_size = k_size
@@ -73,9 +77,9 @@ class Unet(tf.keras.layers.Layer):
 
         # Bottleneck
         self.conv_1 = tf.keras.layers.Conv2D(self.filtros_encoder[-1], 1, padding="same", name = "Conv_BottleNEck_1")
-        self.LRL1 = tf.keras.layers.LeakyReLU(alpha=0.2, name = "B_LRL_1")
+        self.LRL1 = tf.keras.layers.LeakyReLU(alpha=alpha, name = "B_LRL_1")
         self.conv_2 = tf.keras.layers.Conv2D(self.filtros_encoder[-1], 1, padding="same", name = "Conv_BottleNEck_2")
-        self.LRL2 = tf.keras.layers.LeakyReLU(alpha=0.2, name = "B_LRL_2")
+        self.LRL2 = tf.keras.layers.LeakyReLU(alpha=alpha, name = "B_LRL_2")
 
 
         self.encoder_1 = Encoder(self.filtros_encoder[0], name = "Encoder_1", bloque=1)
@@ -89,8 +93,8 @@ class Unet(tf.keras.layers.Layer):
                           
     def call(self, inputs):
         
-        s1, x = self.encoder_1(inputs)
-        s2, x = self.encoder_2(x)
+        _, x = self.encoder_1(inputs)
+        _, x = self.encoder_2(x)
         s3, x = self.encoder_3(x)
         # s3,x = self.encoder_4(x)
         # s4,x = self.encoder_5(x)
@@ -101,8 +105,8 @@ class Unet(tf.keras.layers.Layer):
         b = self.LRL2(b)
 
         c = self.dencoder_1([s3, b])
-        c = self.dencoder_2([s2, c])
-        c = self.dencoder_3([s1, c])
+        c = self.dencoder_2([None, c])
+        c = self.dencoder_3([None, c])
         # c = self.dencoder_4([s1, c])
         # salida_unet = self.dencoder_5([s0, c])
 
@@ -112,4 +116,3 @@ class Unet(tf.keras.layers.Layer):
     def model(self, input_shape):
         x = tf.keras.Input(shape = input_shape)
         return tf.keras.Model(inputs=[x], outputs=self.call(x))
-
